@@ -1,0 +1,13 @@
+# Esecuzione comando terminale
+subprocess32; sys_platform == 'win32'  # fallback per Windows legacy (opzionale)
+
+# Gestione date e file
+datetime
+
+# Nessuna libreria esterna richiesta per ora (solo stdlib Python)
+
+# Se vuoi già prevedere estensioni:
+# streamlit
+# pandas
+# pyttsx3
+# gtts

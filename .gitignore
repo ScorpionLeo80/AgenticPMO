@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.log
+
+# Ambienti virtuali
+.env/
+.venv/
+venv/
+env/
+
+# Output generati dal modello
+output/*.md
+output/*.csv
+
+# File temporanei di VS Code / sistema
+*.swp
+*.DS_Store
+.vscode/
+.idea/

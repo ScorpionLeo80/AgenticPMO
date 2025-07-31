@@ -2,16 +2,17 @@ import subprocess
 import os
 from datetime import datetime
 import logging
+import sys
 
-# 📁 Prepara directory dei log
-if not os.path.exists("logs"):
-    os.makedirs("logs")
+# 📁 Legge il workspace dalla riga di comando, default = output/
+workspace = sys.argv[1] if len(sys.argv) > 1 else "output/"
+os.makedirs(workspace, exist_ok=True)
 
-# 🕒 Timestamp per versionare file di log
-log_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-log_file = f"logs/agentic_run_{log_timestamp}.log"
+# 🕒 Timestamp per versione file
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-# 🧾 Configura logging parlante
+# 🧾 Log in cartella progetto
+log_file = os.path.join(workspace, f"agentic_run_{timestamp}.log")
 logging.basicConfig(
     filename=log_file,
     level=logging.INFO,
@@ -19,31 +20,15 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# Prompt completo da inviare al modello
-PROMPT = """
-Sei un assistente project manager intelligente. Riceverai un obiettivo di progetto e dovrai generare un piano esecutivo.
+# 📥 Lettura del prompt dal file
+prompt_path = os.path.join(workspace, "prompt.txt")
+if not os.path.exists(prompt_path):
+    print("❌ prompt.txt non trovato nel workspace.")
+    logging.error("File prompt.txt mancante nel workspace.")
+    sys.exit(1)
 
-Per favore segui questa struttura nell’output:
-
-🎯 Obiettivo:
-(sintesi dell’obiettivo)
-
-📅 Milestone (con scadenze relative o assolute):
-- (Nome milestone) – (Data o settimana stimata)
-- …
-
-🧩 Task principali (con descrizione sintetica):
-- Task 1: ...
-- Task 2: ...
-- …
-
-⏳ Timeline suggerita:
-(Settimane o mesi, timeline logica coerente)
-
-🔁 Considera un team di 4 persone e una durata di 3 mesi. Pianifica con realismo e buon senso.
-
-Obiettivo del progetto: Migrazione di un'applicazione web su AWS.
-"""
+with open(prompt_path, "r", encoding="utf-8") as f:
+    PROMPT = f.read()
 
 cmd = ["ollama", "run", "phi3"]
 
@@ -70,17 +55,14 @@ try:
         print("⚠️ Nessuna risposta ricevuta dal modello")
         logging.warning("Nessuna risposta generata da phi3")
 
-    # ⏳ Timestamp per nomi dei file
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    # 📄 Salvataggio del piano completo in Markdown
-    markdown_file = f"output/piano_progetto_{timestamp}.md"
+    # 📄 Salvataggio piano in Markdown
+    markdown_file = os.path.join(workspace, f"piano_progetto_{timestamp}.md")
     with open(markdown_file, "w", encoding="utf-8") as f:
         f.write(output)
     print(f"📄 Piano salvato in formato Markdown: {markdown_file}")
     logging.info(f"Piano salvato in Markdown: {markdown_file}")
 
-    # 📊 Estrazione dei task
+    # 📊 Estrazione dei task con parser flessibile
     tasks = []
     inside_task_section = False
     for line in output.splitlines():
@@ -91,12 +73,18 @@ try:
             if line.strip() == "" or line.startswith("⏳") or line.startswith("🔁"):
                 break
             if "Task" in line or "task" in line:
-                parts = line.split(" - ", 1)
+                # Accetta sia "-" che ":" come separatori
+                if " - " in line:
+                    parts = line.split(" - ", 1)
+                elif ":" in line:
+                    parts = line.split(":", 1)
+                else:
+                    continue
                 if len(parts) == 2:
                     tasks.append(parts)
 
     if tasks:
-        csv_file = f"output/piano_task_{timestamp}.csv"
+        csv_file = os.path.join(workspace, f"piano_task_{timestamp}.csv")
         with open(csv_file, "w", encoding="utf-8") as f:
             f.write("Task,Descrizione\n")
             for task, desc in tasks:

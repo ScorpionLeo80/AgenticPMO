@@ -1,0 +1,42 @@
+
+Sei un assistente project manager intelligente. Crea un piano esecutivo per il seguente progetto.
+
+🎯 Obiettivo:
+Progettare e sviluppare una piattaforma SaaS per la gestione documentale collaborativa destinata a PMI, con rilascio in 3 sprint agili e focus su usabilità e compliance GDPR.
+
+⏳ Durata stimata:
+4 mesi
+
+👥 Team coinvolto:
+8
+
+📅 Milestone:
+- Kickoff e definizione requisiti funzionali – Settimana 1
+- Sprint 1: Upload documenti + gestione utenti base – Settimana 2
+- Sprint 2: Condivisione + gestione permessi + notifiche – Settimana 3-4
+- Sprint 3: Audit log + esportazione + GDPR compliance – Settimana 5
+- Testing finale e raccolta feedback utenti – Settimana 6
+- Rilascio in produzione e onboarding PMI pilota – Settimana 7
+
+
+🧩 Task principali:
+- Task 1: Raccolta requisiti e analisi dei processi documentali tipici delle PMI
+- Task 2: Progettazione UI/UX dei moduli principali (upload, condivisione, permessi)
+- Task 3: Sviluppo backend API per gestione documenti, utenti e permessi (Sprint 1-2)
+- Task 4: Integrazione sistema notifiche e log attività utenti
+- Task 5: Implementazione tracciamento GDPR-compliant e audit log (Sprint 3)
+- Task 6: Setup infrastruttura SaaS su cloud (deployment + sicurezza)
+- Task 7: Testing funzionale, test di carico e validazione usabilità
+- Task 8: Stesura documentazione utente e tecnica
+- Task 9: Raccolta feedback utenti pilota e rilascio versione stabile
+
+⚠️ Rischi e criticità:
+- Rischio 1: Incertezza sui requisiti da parte delle PMI clienti → rischio di scope creep
+- Rischio 2: Complessità nella gestione dei permessi granulari e delle regole di condivisione → possibili bug o comportamenti imprevisti
+- Rischio 3: Normative GDPR stringenti sui documenti → necessità di revisione legale e attenzione su audit log e data retention
+- Rischio 4: Possibili ritardi dovuti alla disponibilità parziale del team (part-time o distribuito)
+- Rischio 5: Performance su architetture cloud multi-tenant → rischio di colli di bottiglia se non dimensionato correttamente
+- Vincolo tecnico: Utilizzo di stack tecnologico già adottato in azienda (es. Python + FastAPI, PostgreSQL, S3 compatibile)
+- Vincolo organizzativo: Rilascio in sprint obbligatori e testing da parte del cliente entro date predefinite
+
+🔁 Genera un piano realistico, dettagliato e strutturato per questo scenario.

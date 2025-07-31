@@ -1,8 +1,25 @@
 import subprocess
 import os
 from datetime import datetime
+import logging
 
-# Prompt completo che vogliamo inviare a phi3
+# 📁 Prepara directory dei log
+if not os.path.exists("logs"):
+    os.makedirs("logs")
+
+# 🕒 Timestamp per versionare file di log
+log_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_file = f"logs/agentic_run_{log_timestamp}.log"
+
+# 🧾 Configura logging parlante
+logging.basicConfig(
+    filename=log_file,
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+# Prompt completo da inviare al modello
 PROMPT = """
 Sei un assistente project manager intelligente. Riceverai un obiettivo di progetto e dovrai generare un piano esecutivo.
 
@@ -28,13 +45,12 @@ Per favore segui questa struttura nell’output:
 Obiettivo del progetto: Migrazione di un'applicazione web su AWS.
 """
 
-# Comando per avviare il modello Ollama locale
 cmd = ["ollama", "run", "phi3"]
 
 try:
     print("🧠 Invio prompt a phi3...")
+    logging.info("Prompt inviato al modello phi3")
 
-    # Esecuzione del comando Ollama con input del prompt
     result = subprocess.run(
         cmd,
         input=PROMPT.encode('utf-8'),
@@ -42,24 +58,31 @@ try:
         stderr=subprocess.PIPE
     )
 
-    # Decodifica dell'output ricevuto
     output = result.stdout.decode('utf-8')
-    print("✅ Risposta generata da phi3:\n")
-    print(output)
+    error_output = result.stderr.decode('utf-8')
 
-    # 🔁 Creiamo un timestamp per salvare i file con nome univoco
+    if output.strip():
+        print("✅ Risposta generata da phi3:\n")
+        print(output)
+        logging.info("Risposta ricevuta dal modello")
+        logging.info(output)
+    else:
+        print("⚠️ Nessuna risposta ricevuta dal modello")
+        logging.warning("Nessuna risposta generata da phi3")
+
+    # ⏳ Timestamp per nomi dei file
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # ✅ Salviamo l'intero output in Markdown
+    # 📄 Salvataggio del piano completo in Markdown
     markdown_file = f"output/piano_progetto_{timestamp}.md"
     with open(markdown_file, "w", encoding="utf-8") as f:
         f.write(output)
     print(f"📄 Piano salvato in formato Markdown: {markdown_file}")
+    logging.info(f"Piano salvato in Markdown: {markdown_file}")
 
-    # 🔍 Estrazione dei task dalla sezione 🧩
+    # 📊 Estrazione dei task
     tasks = []
     inside_task_section = False
-
     for line in output.splitlines():
         if "🧩" in line:
             inside_task_section = True
@@ -72,15 +95,19 @@ try:
                 if len(parts) == 2:
                     tasks.append(parts)
 
-    # ✅ Salviamo i task in formato CSV
-    csv_file = f"output/piano_task_{timestamp}.csv"
-    with open(csv_file, "w", encoding="utf-8") as f:
-        f.write("Task,Descrizione\n")
-        for task, desc in tasks:
-            desc = desc.replace(",", ";")  # per evitare errori nei CSV
-            f.write(f"{task.strip()},{desc.strip()}\n")
-
-    print(f"📊 Task salvati in formato CSV: {csv_file}")
+    if tasks:
+        csv_file = f"output/piano_task_{timestamp}.csv"
+        with open(csv_file, "w", encoding="utf-8") as f:
+            f.write("Task,Descrizione\n")
+            for task, desc in tasks:
+                desc = desc.replace(",", ";")
+                f.write(f"{task.strip()},{desc.strip()}\n")
+        print(f"📊 Task salvati in formato CSV: {csv_file}")
+        logging.info(f"Task salvati in CSV: {csv_file}")
+    else:
+        print("⚠️ Nessun task trovato nel testo generato")
+        logging.warning("Nessun task rilevato nella sezione 🧩")
 
 except Exception as e:
     print("❌ Errore durante l'esecuzione:", str(e))
+    logging.error(f"Errore durante esecuzione: {str(e)}")
